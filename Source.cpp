@@ -11,7 +11,7 @@ int wmain(int argc, wchar_t** argv) {
 	CHAR Buffer[BUF_SIZE];
 
 	if (argc != 3) {
-		printf("Использование: cpw файл1 файл2\n");
+		printf("Неправильное количество аргументов!\n");
 		return  1;
 	}
 
