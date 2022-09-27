@@ -1,5 +1,4 @@
 #include <Windows.h>
-#include <string.h>
 #include <stdio.h> 
 #define BUF_SIZE 256
 
@@ -11,12 +10,12 @@ int wmain(int argc, wchar_t** argv) {
 	CHAR Buffer[BUF_SIZE];
 
 	if (argc != 3) {
-		printf("Неправильное количество аргументов!\n");
+		printf("Использование: cpw test.txt out.txt\n");
 		return  1;
 	}
 
-	/*LPCWSTR name1 = L"C://Users/sekir/source/repos/cpw/x64/Debug/test.txt";
-	LPCWSTR name2 = L"C://Users/sekir/source/repos/cpw/x64/Debug/out.txt";*/
+	/*LPCWSTR name1 = L"C:"; Для дебага
+	LPCWSTR name2 = L"C:*/
 
 	hIn = CreateFile(argv[1], GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (hIn == INVALID_HANDLE_VALUE) {
