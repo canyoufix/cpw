@@ -3,7 +3,7 @@
 
 #define BUF_SIZE 256
 
-int changeBuffer(CHAR Buffer[], DWORD &nIn, INT numFromCMD);
+INT(*changeBuffer)(CHAR[], DWORD*, INT);
 
 int wmain(int argc, wchar_t** argv) {
 	SetConsoleCP(1251);
@@ -22,6 +22,19 @@ int wmain(int argc, wchar_t** argv) {
 	}
 	printf("\n");
 
+	//DLL
+	hLib = LoadLibrary(L"DLL.dll");
+	if (hLib == NULL) {
+		printf("Не удалось загрузить библиотеку.");
+		exit(-1);
+	}
+	changeBuffer = (INT(*)(CHAR[], DWORD*, INT))GetProcAddress(hLib, "changeBuffer");
+	if (changeBuffer == NULL) {
+		printf("Вызываемая функция не найдена");
+		exit(-2);
+	}
+
+
 
 	hIn = CreateFile(argv[1], GENERIC_READ, 0, NULL, OPEN_EXISTING, 0, NULL);
 	if (hIn == INVALID_HANDLE_VALUE) {
@@ -38,8 +51,7 @@ int wmain(int argc, wchar_t** argv) {
 	while (ReadFile(hIn, Buffer, BUF_SIZE, &nIn, NULL) && nIn > 0) {
 		INT numFromCMD = _wtoi(argv[2]);
 
-		INT numOfReplace = changeBuffer(Buffer, nIn, numFromCMD);
-
+		INT numOfReplace = (*changeBuffer)(Buffer, &nIn, numFromCMD);
 		if (numOfReplace == -1) {
 			return 5;
 		}
@@ -49,49 +61,11 @@ int wmain(int argc, wchar_t** argv) {
 			printf("Неустранимая ошибка записи: %x\n", GetLastError());
 			return 4;
 		}
-		
 		printf("Количество замененных цифр: %d", numOfReplace);
 	}
 
 	CloseHandle(hIn);
 	CloseHandle(hOut);
+	FreeLibrary(hLib);
 	return 0;
-}
-
-int changeBuffer(CHAR Buffer[], DWORD &nIn, INT numFromCMD) {
-	INT numOfNum = 0, index = 0;
-
-	while (index < nIn) { //Количество цифр во всем буффере
-		if (Buffer[index] >= '0' && Buffer[index] <= '9') {
-			numOfNum++;
-		}
-		index++;
-	}
-
-	if (numOfNum == 0 || numFromCMD <= 0) { //Проверка количества введнных цифр
-		printf("Нельзя заменено 0 цифр(ы), либо в документе они отсутствуют.\n");
-		return -1;
-	}
-	if (numOfNum >= numFromCMD) {
-		printf("Будет заменено %d цифр(ы).\n", numFromCMD);
-	}
-	else {
-		printf("Во всем документе %d цифр(ы), а не %d, поэтому будут заменены все.\n\n", numOfNum, numFromCMD);
-		numFromCMD = numOfNum;
-	}
-
-	index = 0;
-	INT numOfReplace = 0;
-	while (index < nIn) {
-		if (Buffer[index] >= '0' && Buffer[index] <= '9') {
-			Buffer[index] = ' ';
-			numOfReplace++;
-			if (numOfReplace == numFromCMD) {
-				index = nIn;
-			}
-		}
-		index++;
-	}
-
-	return numOfReplace;
 }
