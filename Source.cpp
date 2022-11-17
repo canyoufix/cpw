@@ -12,28 +12,25 @@ int main(int argc, char* argv[]) {
 
 	HANDLE hIn, hOut;
 	HINSTANCE hLib;
-
 	DWORD nIn, nOut;
-	CHAR Buffer[BUF_SIZE], outFile[BUF_SIZE];
-	char* cmdLine;
+	CHAR Buffer[BUF_SIZE], newNameOut[BUF_SIZE];
 
 	if (argc < 3) {
-		printf("No file to process!\n");
+		printf("Неправильное количество аргументов!\n");
 		exit(-1);
 	}
-
-	cmdLine = (char*)GetCommandLine();
+	char* cmdLine = (char*)GetCommandLine();
 	printf("\n");
 
 	//DLL
 	hLib = LoadLibrary("DLL.dll");
 	if (hLib == NULL) {
-		printf("Не удалось загрузить библиотеку.");
+		printf("Не удалось загрузить библиотеку.\n");
 		exit(-1);
 	}
 	changeBuffer = (INT(*)(CHAR[], DWORD*, INT))GetProcAddress(hLib, "changeBuffer");
 	if (changeBuffer == NULL) {
-		printf("Вызываемая функция не найдена");
+		printf("Вызываемая функция не найдена\n");
 		exit(-2);
 	}
 
@@ -45,13 +42,13 @@ int main(int argc, char* argv[]) {
 
 	int i = 0;
 	while (*(argv[1] + i) != '.') {
-		outFile[i] = *(argv[1] + i);
+		newNameOut[i] = *(argv[1] + i);
 		i++;
 	}
-	outFile[i] = '\0';
-	strcat(outFile, "_New.txt");
+	newNameOut[i] = '\0';
+	strcat(newNameOut, "_New.txt");
 
-	hOut = CreateFile(outFile, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	hOut = CreateFile(newNameOut, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hOut == INVALID_HANDLE_VALUE) {
 		printf("Невозможно открыть выходной файл. Ошибка: %x\n", GetLastError());
 		return 3;
@@ -71,10 +68,10 @@ int main(int argc, char* argv[]) {
 			printf("Неустранимая ошибка записи: %x\n", GetLastError());
 			return 4;
 		}
-		printf("Количество замененных цифр: %d", numOfReplace);
+		printf("Количество замененных цифр: %d\n", numOfReplace);
 	}
 
-	printf("\n(ProcesslD: %lu), File %s inserts = %d\n", GetCurrentProcessId(), argv[1], numOfReplace);
+	printf("(Process[ID]: %lu), File [%s] replace = %d\n", GetCurrentProcessId(), argv[1], numOfReplace);
 	CloseHandle(hIn);
 	CloseHandle(hOut);
 	FreeLibrary(hLib);
